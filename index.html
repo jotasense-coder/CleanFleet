@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CleanFleet</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;color:#1a1a1a;background:#f5f5f5;min-height:100vh}
+.nav{display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid #e5e5e5;padding:0 16px;position:sticky;top:0;z-index:50;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.nb{padding:10px 11px;border:none;background:none;cursor:pointer;font-size:10px;font-weight:600;color:#888;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all .15s}
+.nb.on{color:#1a1a1a;border-bottom-color:#1a1a1a}
+.av{width:28px;height:28px;border-radius:50%;background:#e8f4ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.av.admin{background:#fef3c7;color:#d97706}
+.main{max-width:980px;margin:0 auto;padding:20px 16px}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.stat{background:#f9f9f9;border:1px solid #efefef;border-radius:10px;padding:14px}
+.btn{padding:7px 14px;border-radius:8px;font-family:inherit;font-weight:600;font-size:12px;cursor:pointer;border:1px solid #ddd;background:#fff;color:#333;transition:all .15s}
+.btn:hover{background:#f5f5f5}
+.btnp{background:#1a1a1a!important;color:#fff!important;border-color:#1a1a1a!important}
+.btnd{background:#fff5f5!important;color:#dc2626!important;border-color:#fca5a5!important}
+.btnw{background:#fffbeb!important;color:#d97706!important;border-color:#fcd34d!important}
+.btns{background:#f0fdf4!important;color:#16a34a!important;border-color:#86efac!important}
+.bdg{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:600}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
+.inp{background:#f9f9f9;border:1px solid #ddd;border-radius:8px;padding:8px 12px;color:#1a1a1a;font-family:inherit;font-size:16px;width:100%;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none}
+.inp:focus{border-color:#1a1a1a;background:#fff}
+.lbl{display:block;font-size:11px;color:#666;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.sh{font-size:10px;color:#999;font-weight:700;letter-spacing:.8px;margin-bottom:10px;text-transform:uppercase}
+.tag{padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #ddd;background:#f5f5f5;color:#666;transition:all .15s}
+.tag.on{background:#1a1a1a;border-color:#1a1a1a;color:#fff}
+.cond-opt{padding:7px 13px;border-radius:99px;border:1px solid #ddd;cursor:pointer;font-size:12px;font-weight:500;background:#f5f5f5;color:#666;display:inline-flex;align-items:center;gap:5px;margin:3px;transition:all .15s}
+.cond-opt.on-ok{background:#f0fdf4;border-color:#86efac;color:#16a34a}
+.cond-opt.on-warn{background:#fffbeb;border-color:#fcd34d;color:#d97706}
+.cond-opt.on-danger{background:#fff5f5;border-color:#fca5a5;color:#dc2626}
+.loc-opt{padding:9px 14px;border-radius:9px;border:1px solid #ddd;cursor:pointer;font-size:12px;font-weight:500;background:#f5f5f5;color:#666;display:inline-flex;align-items:center;gap:6px;margin:3px;transition:all .15s}
+.loc-opt.on{background:#eff6ff;border-color:#93c5fd;color:#2563eb}
+.cd{width:100%;aspect-ratio:1;border-radius:8px;border:1px solid #eee;cursor:pointer;font-size:11px;font-weight:600;position:relative;display:flex;align-items:center;justify-content:center;background:#f9f9f9;color:#666;transition:all .15s}
+.cd:hover{border-color:#bbb;background:#fff}
+.cd.tod{border-color:#1a1a1a;color:#1a1a1a;font-weight:700}
+.cd.sel{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.cd.pst{opacity:.3;cursor:default}
+.cdot{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%}
+.mbo{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(2px)}
+.mod{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:22px;width:92%;max-width:440px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.aw{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.ir{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f0f0f0;font-size:12px}
+.ir:last-child{border-bottom:none}
+.il{color:#999;min-width:95px;font-size:11px;font-weight:600}
+.lw{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f5f5f5 0%,#e8f4ff 100%)}
+.lc{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:28px;width:90%;max-width:320px;box-shadow:0 10px 40px rgba(0,0,0,.1)}
+.wb{width:100%;padding:11px 14px;margin-bottom:7px;border-radius:10px;border:1px solid #e5e5e5;background:#f9f9f9;color:#1a1a1a;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:all .15s}
+.wb:hover{border-color:#1a1a1a;background:#fff}
+.wb.ab{border-color:#fcd34d;background:#fffbeb}
+.toastEl{position:fixed;top:16px;right:16px;padding:10px 16px;border-radius:10px;font-size:12px;font-weight:600;z-index:300;display:none;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.errbx{display:none;background:#fff5f5;border:1px solid #fca5a5;border-radius:8px;padding:8px 12px;color:#dc2626;font-size:12px;margin-top:8px}
+.infobx{background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;padding:10px 14px;color:#2563eb;font-size:12px;margin-bottom:12px}
+.warnbx{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px 14px;color:#d97706;font-size:12px;margin-bottom:12px}
+.mopt{padding:10px 13px;border-radius:10px;border:1px solid #e5e5e5;cursor:pointer;font-size:13px;margin-bottom:7px;background:#f9f9f9;display:flex;align-items:center;gap:10px;transition:all .15s}
+.mopt.avail{border-color:#86efac;background:#f0fdf4}
+.mopt.selopt{border-color:#2563eb;background:#eff6ff;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.mopt.taken{opacity:.4;cursor:not-allowed}
+.mopt.broken{opacity:.3;cursor:not-allowed}
+.pin-box{display:flex;gap:10px;justify-content:center;margin:18px 0}
+.pin-digit{width:46px;height:54px;border-radius:10px;border:1px solid #ddd;background:#f9f9f9;font-size:24px;font-weight:700;text-align:center;color:#1a1a1a;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none}
+.pin-digit:focus{border-color:#1a1a1a;background:#fff}
+.admin-badge{background:#fffbeb;color:#d97706;border:1px solid #fcd34d;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
+.in-use-badge{background:#eff6ff;color:#2563eb;border:1px solid #93c5fd;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
+.future-badge{background:#f0fdf4;color:#16a34a;border:1px solid #86efac;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
+.log-row{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:11px}
+.log-row:last-child{border-bottom:none}
+.hint{background:#f9f9f9;border:1px solid #e5e5e5;border-radius:10px;padding:22px;text-align:center;color:#999;font-size:13px}
+.time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.time-slot{padding:8px 4px;border-radius:8px;border:1px solid #e5e5e5;cursor:pointer;font-size:12px;font-weight:600;text-align:center;background:#f9f9f9;color:#666;transition:all .15s}
+.time-slot:hover{border-color:#999;color:#1a1a1a;background:#fff}
+.time-slot.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.time-slot.past{opacity:.3;cursor:not-allowed}
+.loading{display:flex;align-items:center;justify-content:center;min-height:300px;flex-direction:column;gap:14px;color:#999}
+.spinner{width:36px;height:36px;border:3px solid #e5e5e5;border-top-color:#1a1a1a;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Setup screen */
+.setup-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-height(135deg,#f5f5f5,#e8f4ff)}
+.setup-card{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:32px;width:90%;max-width:480px;box-shadow:0 10px 40px rgba(0,0,0,.1)}
+.setup-step{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px}
+.setup-step:last-child{border-bottom:none}
+.setup-num{width:24px;height:24px;border-radius:50%;background:#1a1a1a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+
+/* ── RESPONSIVO ── */
+
+/* Tablet: hasta 1024px */
+@media (max-width: 1024px) {
+  .main{padding:14px 10px}
+  .nav{padding:0 8px}
+  .nb{padding:8px 7px;font-size:9px}
+}
+
+/* Maquinas en movil: dentro de columna izquierda, ocultar columna derecha */
+.book-machine-mobile{display:none}
+.book-machine-desktop{display:block}
+
+/* Movil: hasta 768px */
+@media (max-width: 768px) {
+  /* Navbar - solo iconos grandes */
+  .nb{padding:10px 6px;font-size:0;border-bottom-width:3px}
+  .nb span{font-size:18px!important}
+  .nb.on{border-bottom-color:#1a1a1a}
+  .nav{padding:0 6px}
+
+  /* Main container */
+  .main{padding:12px 10px}
+
+  /* Stats grid: 2 columnas en móvil */
+  .stats-grid{grid-template-columns:repeat(2,1fr)!important}
+
+  /* Flota: 2 columnas */
+  .fleet-grid{grid-template-columns:repeat(2,1fr)!important}
+
+  /* Reservar: maquinas dentro de columna izquierda en movil */
+  .book-machine-mobile{display:block!important}
+  .book-machine-desktop{display:none!important}
+
+  /* Grids de 2 columnas → 1 columna */
+  .grid-2col{grid-template-columns:1fr!important}
+
+  /* Reservar: columnas → filas */
+  .book-grid{grid-template-columns:1fr!important}
+  .book-left{min-width:unset!important;width:100%!important}
+
+  /* Time slots: 3 columnas en móvil */
+  .time-grid{grid-template-columns:repeat(3,1fr)!important}
+  .time-slot{padding:10px 4px!important;font-size:13px!important}
+
+  /* Calendario: panel lateral debajo */
+  .cal-grid{grid-template-columns:1fr!important}
+
+  /* Admin: 1 columna */
+  .admin-grid{grid-template-columns:1fr!important}
+
+  /* Cards más compactas */
+  .card{padding:12px}
+
+  /* Modales más anchos */
+  .mod{width:96%!important;padding:16px!important}
+
+  /* Badges más pequeños */
+  .bdg{font-size:10px!important;padding:2px 7px!important}
+
+  /* Botones de acción en tarjetas: fila horizontal */
+  .bcard-actions{flex-direction:row!important;flex-wrap:wrap!important}
+  .bcard-actions .btn{font-size:10px!important;padding:6px 8px!important;flex:1!important}
+
+  /* Nav usuario */
+  .nav-user-name{display:none!important}
+  .nav-right{gap:5px!important}
+
+  /* Pins más grandes en móvil */
+  .pin-digit{width:52px!important;height:60px!important;font-size:26px!important}
+  .pin-box{gap:10px!important}
+
+  /* Login card más ancha */
+  .lc{max-width:340px!important;padding:20px!important}
+
+  /* Devolucion: selector de reserva mas compacto */
+  .ret-grid{grid-template-columns:1fr!important}
+
+  /* Boton confirmar sticky en movil */
+  .sticky-confirm{position:sticky;bottom:0;background:#f5f5f5;padding:10px 0 6px;z-index:10}
+}
+
+/* Móvil pequeño: hasta 400px */
+@media (max-width: 400px) {
+  .nb{padding:9px 4px}
+  .nb span{font-size:16px!important}
+  .fleet-grid{grid-template-columns:repeat(2,1fr)!important}
+  .time-grid{grid-template-columns:repeat(2,1fr)!important}
+}
+</style>
+</head>
+<body>
+<div class="toastEl" id="toastEl"></div>
+<div id="root"></div>
+<script charset="utf-8">
+// =======================================================
+// CONFIGURACION - REEMPLAZA ESTOS DOS VALORES
+// =======================================================
+var AIRTABLE_TOKEN = "patAPAll7QLr0sNB4.604ee34475acd19c5bf05b1c8d3a877a355f17bfb4866928d90b3ceb87503a6b";
+var BASE_ID        = "appLiNuWdi07ZA07s";
+// =======================================================
+
+var API_BASE = "https://api.airtable.com/v0/" + BASE_ID;
+var CONFIGURED = AIRTABLE_TOKEN !== "TU_AIRTABLE_TOKEN" && BASE_ID !== "TU_BASE_ID";
+
+// -- AIRTABLE API --
+async function atErrMsg(res) {
+  try { var d=await res.json(); return "HTTP "+res.status+" — "+(d?.error?.message||d?.error?.type||JSON.stringify(d)); }
+  catch(e) { return "HTTP "+res.status; }
+}
+async function atGetAll(table) {
+  var records = [], offset = null;
+  do {
+    var url = API_BASE + "/" + encodeURIComponent(table) + "?pageSize=100" + (offset ? "&offset=" + offset : "");
+    var res = await fetch(url, {headers:{Authorization:"Bearer "+AIRTABLE_TOKEN}});
+    if (!res.ok) throw new Error(await atErrMsg(res));
+    var data = await res.json();
+    records = records.concat(data.records);
+    offset = data.offset;
+  } while(offset);
+  return records;
+}
+async function atCreate(table, fields) {
+  var res = await fetch(API_BASE + "/" + encodeURIComponent(table), {
+    method:"POST", headers:{Authorization:"Bearer "+AIRTABLE_TOKEN,"Content-Type":"application/json"},
+    body: JSON.stringify({fields})
+  });
+  if (!res.ok) throw new Error(await atErrMsg(res));
+  return res.json();
+}
+async function atUpdate(table, id, fields) {
+  var res = await fetch(API_BASE + "/" + encodeURIComponent(table) + "/" + id, {
+    method:"PATCH", headers:{Authorization:"Bearer "+AIRTABLE_TOKEN,"Content-Type":"application/json"},
+    body: JSON.stringify({fields})
+  });
+  if (!res.ok) throw new Error(await atErrMsg(res));
+  return res.json();
+}
+async function atDelete(table, id) {
+  var res = await fetch(API_BASE + "/" + encodeURIComponent(table) + "/" + id, {
+    method:"DELETE", headers:{Authorization:"Bearer "+AIRTABLE_TOKEN}
+  });
+  if (!res.ok) throw new Error(await atErrMsg(res));
+  return res.json();
+}
+
+// -- CONSTANTES --
+var CONDS = ["Lista para usar","Limpiar maquina","Cambiar filtros","Recargar liquidos","Reparacion menor","Danada / averiada"];
+var COND_WARN = ["Cambiar filtros","Recargar liquidos","Reparacion menor","Limpiar maquina"];
+var COND_DANGER = ["Danada / averiada"];
+var LOCS = ["Almacen central","Oficinas","Planta baja"];
+var TYPES = ["Fregadora","Pulidora","Aspiradora","Otro"];
+var ICO = {Fregadora:"🧹",Pulidora:"⚙️",Aspiradora:"🌀",Otro:"🔧"};
+var TIME_SLOTS = [];
+for(var h=0;h<24;h++) for(var mn=0;mn<60;mn+=15)
+  TIME_SLOTS.push((h<10?"0":"")+h+":"+(mn===0?"00":mn));
+
+var pad = n => String(n).padStart(2,"0");
+var fmt = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+var fmtT = d => pad(d.getHours())+":"+pad(d.getMinutes());
+var addDays = (s,n) => { var d=new Date(s+"T12:00:00"); d.setDate(d.getDate()+n); return fmt(d); };
+var TODAY = new Date(), T = fmt(TODAY), TT = fmtT(TODAY);
+function refreshDate(){TODAY=new Date();T=fmt(TODAY);TT=fmtT(TODAY);}
+
+// -- ESTADO GLOBAL --
+var cu=null, view="dashboard", appLoading=false;
+var USERS=[], MACHINES=[], BOOKINGS=[];
+var calM=new Date(TODAY.getFullYear(),TODAY.getMonth(),1), calS=T, calF="Todas", fType="Todas";
+var modal=null;
+var fD={date:"",time:"",mid:null,comment:""};
+var retF={bid:"",cond:"",locP:"",locC:"",locMode:"",notes:"",date:T,time:TT};
+var loginState={uid:"",pin:"",err:""};
+var newMachine={name:"",type:"Fregadora",loc:"Almacen central",notes:""};
+var newUser={name:"",pin:""};
+
+// -- CARGAR DATOS --
+async function loadAll() {
+  if (!navigator.onLine) {
+    toast("Sin conexion a internet. Comprueba tu red.","err");
+    appLoading = false; render(); return;
+  }
+  appLoading = true; render();
+  try {
+    var [uRecs, mRecs, bRecs] = await Promise.all([
+      atGetAll("Users"), atGetAll("Machines"), atGetAll("Bookings")
+    ]);
+    USERS = uRecs.map(r => ({
+      id:r.id, name:r.fields.Name||"", pin:String(r.fields.Pin||""),
+      isAdmin:r.fields.IsAdmin===true, ini:r.fields.Initials||""
+    }));
+    MACHINES = mRecs.map(r => ({
+      id:r.id, name:r.fields.Name||"", type:r.fields.Type||"Otro",
+      loc:r.fields.Location||"", cond:r.fields.Condition||"Lista para usar",
+      notes:r.fields.Notes||"", active:r.fields.Active===true
+    }));
+    BOOKINGS = bRecs.map(r => ({
+      id:r.id, machineId:r.fields.MachineId||"", wid:r.fields.WorkerId||"",
+      machineName:r.fields.MachineName||"", workerName:r.fields.WorkerName||"",
+      startDate:r.fields.StartDate||"", startTime:r.fields.StartTime||"",
+      comment:r.fields.Comment||"", returned:r.fields.Returned===true,
+      retDate:r.fields.RetDate||"", retTime:r.fields.RetTime||"",
+      retCond:r.fields.RetCondition||"", retLoc:r.fields.RetLocation||"",
+      retNotes:r.fields.RetNotes||""
+    }));
+  } catch(e) {
+    toast("Error cargando datos. Revisa tu Token y Base ID.", "err");
+    console.error(e);
+  }
+  appLoading = false; render();
+}
+
+// -- LOGICA CORE --
+function bookingDates(b) {
+  var night = parseInt(b.startTime.split(":")[0]) >= 18;
+  return night ? [b.startDate, addDays(b.startDate,1)] : [b.startDate];
+}
+function reservedOnDate(mid, date, excludeId) {
+  return BOOKINGS.some(b =>
+    b.machineId===mid && !b.returned &&
+    b.id!==(excludeId||"") && bookingDates(b).indexOf(date)!==-1
+  );
+}
+function workerHasMachineOnDate(wid, mid, date, excludeId) {
+  return BOOKINGS.some(b =>
+    b.wid===wid && b.machineId===mid && !b.returned &&
+    b.id!==(excludeId||"") && bookingDates(b).indexOf(date)!==-1
+  );
+}
+function machineStatus(m) {
+  if (!m.active) return "inactiva";
+  if (m.cond==="Danada / averiada") return "averiada";
+  if (COND_WARN.indexOf(m.cond)>=0) return "mantenimiento";
+  // En uso si tiene cualquier reserva sin devolver que ya haya comenzado (startDate <= hoy)
+  var enUso = BOOKINGS.some(function(b) {
+    return b.machineId===m.id && !b.returned && b.startDate<=T;
+  });
+  if (enUso) return "en_uso";
+  return "disponible";
+}
+function isBroken(m) {
+  var s=machineStatus(m); return s==="averiada"||s==="mantenimiento"||s==="inactiva";
+}
+function canBook(m, date, excludeId) {
+  if (isBroken(m)) return false;
+  return !reservedOnDate(m.id, date, excludeId||null);
+}
+function getActiveUser(mid) {
+  // Busca cualquier reserva sin devolver que ya haya comenzado
+  var b = BOOKINGS.find(function(b) {
+    return b.machineId===mid && !b.returned && b.startDate<=T;
+  });
+  return b ? USERS.find(u => u.id===b.wid)||null : null;
+}
+function bState(b) {
+  if (b.returned) return "devuelta";
+  return b.startDate<=T ? "en_uso" : "futura";
+}
+function getFinalLoc() { return retF.locMode==="custom" ? retF.locC : retF.locP; }
+
+// -- BADGES --
+function sbdg(s) {
+  var m = {
+    disponible:   {l:"Disponible",    c:"#16a34a",b:"#f0fdf4"},
+    en_uso:       {l:"En uso",        c:"#2563eb",b:"#eff6ff"},
+    mantenimiento:{l:"Mantenimiento", c:"#d97706",b:"#fffbeb"},
+    averiada:     {l:"Averiada",      c:"#dc2626",b:"#fff5f5"},
+    inactiva:     {l:"Inactiva",      c:"#999",   b:"#f5f5f5"}
+  };
+  var x=m[s]||m.disponible;
+  return `<span class="bdg" style="background:${x.b};color:${x.c}"><span class="dot" style="background:${x.c}"></span>${x.l}</span>`;
+}
+function cbdg(c) {
+  if (!c) return "";
+  var col = COND_DANGER.indexOf(c)>=0?"#dc2626":COND_WARN.indexOf(c)>=0?"#d97706":"#16a34a";
+  return `<span class="bdg" style="background:#f9f9f9;color:${col};border:1px solid #e5e5e5">${c}</span>`;
+}
+function condOnClass(c) {
+  return COND_DANGER.indexOf(c)>=0?"on-danger":COND_WARN.indexOf(c)>=0?"on-warn":"on-ok";
+}
+
+// -- HELPERS UI --
+function toast(msg, type) {
+  var t=document.getElementById("toastEl"); t.textContent=msg;
+  var e=type==="err";
+  t.style.background=e?"#fff5f5":"#f0fdf4";
+  t.style.border=`1px solid ${e?"#fca5a5":"#86efac"}`;
+  t.style.color=e?"#dc2626":"#16a34a";
+  t.style.display="block"; setTimeout(()=>t.style.display="none",3500);
+}
+function setV(v) {
+  if (v !== view && isFormActive()) {
+    if (!confirm("Tienes un formulario en progreso. Si cambias de seccion perderás los datos. ¿Continuar?")) return;
+    fD={date:"",time:"",mid:null,comment:""};
+    retF={bid:"",cond:"",locP:"",locC:"",locMode:"",notes:"",date:T,time:TT};
+  }
+  view=v; render();
+}
+function prevM(){calM=new Date(calM.getFullYear(),calM.getMonth()-1,1);render();}
+function nextM(){calM=new Date(calM.getFullYear(),calM.getMonth()+1,1);render();}
+function setCS(d){calS=d;render();}
+function setCF(f){calF=f;render();}
+function setFT(f){fType=f;render();}
+function closeModal(){modal=null;render();}
+function openMD(id){modal={t:"md",id};render();}
+function openEditB(id){var b=BOOKINGS.find(x=>x.id===id);modal={t:"editB",bid:id,startDate:b.startDate,startTime:b.startTime,reason:""};render();}
+function openCancB(id){modal={t:"cancB",bid:id,reason:""};render();}
+function openReturnModal(bid){var now=new Date();retF={bid,cond:"",locP:"",locC:"",locMode:"",notes:"",date:fmt(now),time:fmtT(now)};view="returns";render();}
+function setRetCond(c){retF.cond=c;render();}
+function setRetLocP(l){retF.locP=l;retF.locC="";retF.locMode="preset";render();}
+function setRetLocC(v){retF.locC=v;retF.locMode=v?"custom":"";if(v)retF.locP="";render();}
+// -- SESION Y TIMEOUT DE INACTIVIDAD --
+var INACTIVITY_MINUTES = 5; // minutos sin actividad para cerrar sesion
+var inactivityTimer = null;
+
+function saveSession(user) {
+  try {
+    sessionStorage.setItem("cf_user_id", user.id);
+    sessionStorage.setItem("cf_session_time", Date.now().toString());
+  } catch(e) {}
+}
+
+function clearSession() {
+  try {
+    sessionStorage.removeItem("cf_user_id");
+    sessionStorage.removeItem("cf_session_time");
+  } catch(e) {}
+}
+
+function restoreSession() {
+  try {
+    var uid = sessionStorage.getItem("cf_user_id");
+    var time = parseInt(sessionStorage.getItem("cf_session_time") || "0");
+    if (!uid) return null;
+    // Verificar que no haya pasado el tiempo de inactividad
+    var minutesPassed = (Date.now() - time) / 60000;
+    if (minutesPassed > INACTIVITY_MINUTES) {
+      clearSession();
+      return null;
+    }
+    return uid;
+  } catch(e) { return null; }
+}
+
+function isFormActive() {
+  // No cerrar sesion si hay un formulario activo
+  if (view === "book" && (fD.date || fD.mid || fD.time)) return true;
+  if (view === "returns" && retF.bid) return true;
+  return false;
+}
+
+function resetInactivityTimer() {
+  if (inactivityTimer) clearTimeout(inactivityTimer);
+  // Actualizar timestamp de sesion
+  try { sessionStorage.setItem("cf_session_time", Date.now().toString()); } catch(e) {}
+  // Programar cierre automatico
+  inactivityTimer = setTimeout(function() {
+    if (cu && isFormActive()) {
+      // Hay formulario activo - posponer 2 minutos mas
+      resetInactivityTimer();
+      return;
+    }
+    if (cu) {
+      cu = null;
+      clearSession();
+      view = "dashboard";
+      render();
+      // Mostrar aviso de sesion expirada
+      setTimeout(function() {
+        var t = document.getElementById("toastEl");
+        if (t) {
+          t.textContent = "Sesion cerrada por inactividad";
+          t.style.background = "#fffbeb";
+          t.style.border = "1px solid #fcd34d";
+          t.style.color = "#d97706";
+          t.style.display = "block";
+          setTimeout(function(){t.style.display="none";}, 4000);
+        }
+      }, 100);
+    }
+  }, INACTIVITY_MINUTES * 60 * 1000);
+}
+
+// Detectar actividad del usuario
+function setupActivityListeners() {
+  ["click","keydown","touchstart","scroll","mousemove"].forEach(function(event) {
+    document.addEventListener(event, function() {
+      if (cu) resetInactivityTimer();
+    }, {passive: true});
+  });
+  // Detectar cambios de conexion
+  window.addEventListener("online", function() {
+    toast("Conexion restaurada. Actualizando datos...");
+    if(CONFIGURED && cu) loadAll();
+  });
+  window.addEventListener("offline", function() {
+    toast("Sin conexion a internet. Los cambios no se guardaran.","err");
+  });
+}
+
+function logout(){
+  cu=null;
+  clearSession();
+  if(inactivityTimer) clearTimeout(inactivityTimer);
+  hasUpdates=false;
+  view="dashboard";
+  fD={date:"",time:"",mid:null,comment:""};
+  retF={bid:"",cond:"",locP:"",locC:"",locMode:"",notes:"",date:T,time:TT};
+  calM=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
+  calS=T; calF="Todas"; fType="Todas"; exportFilter="mensual";
+  render();
+}
+
+function setBookDate(val) {
+  fD.date=val;
+  if (fD.mid) { var m=MACHINES.find(x=>x.id===fD.mid); if(!m||!canBook(m,val,null)) fD.mid=null; }
+  setTimeout(function(){render();},50);
+}
+function setBookTime(val){fD.time=val;setTimeout(function(){render();},50);}
+function selectMachine(mid) {
+  if (!fD.date){toast("Primero elige la fecha","err");return;}
+  var m=MACHINES.find(x=>x.id===mid);
+  if(!m||!canBook(m,fD.date,null))return;
+  fD.mid=(fD.mid===mid)?null:mid; render();
+}
+
+// -- LOGIN --
+function selectUser(uid){loginState.uid=uid;loginState.pin="";loginState.err="";render();setTimeout(()=>document.getElementById("p0")?.focus(),100);}
+function pinInput(idx,val) {
+  val=val.replace(/\D/g,"").slice(0,1);
+  var p=loginState.pin.split(""); p[idx]=val;
+  loginState.pin=p.join("").replace(/undefined/g,"");
+  var input=document.getElementById("p"+idx);
+  if(input) input.value=val;
+  if(val&&idx<3) {
+    setTimeout(function(){
+      var next=document.getElementById("p"+(idx+1));
+      if(next){next.focus();next.select();}
+    },10);
+  }
+  if(loginState.pin.length===4) setTimeout(doLogin,100);
+}
+function doLogin() {
+  var u=USERS.find(u=>u.id===loginState.uid);
+  if(u&&loginState.pin===u.pin){
+    cu=u;
+    loginState={uid:"",pin:"",err:""};
+    view="dashboard";
+    saveSession(u);
+    resetInactivityTimer();
+    render();
+  }
+  else{loginState.err="PIN incorrecto";loginState.pin="";render();setTimeout(()=>document.getElementById("p0")?.focus(),100);}
+}
+function backLogin(){loginState.uid="";loginState.pin="";loginState.err="";render();}
+
+// -- ACCIONES AIRTABLE --
+async function submitBook() {
+  var comment=fD.comment||"";
+  if(!fD.date||!fD.time){toast("Indica fecha y hora","err");return;}
+  if(!fD.mid){toast("Selecciona una maquina","err");return;}
+  var m=MACHINES.find(x=>x.id===fD.mid);
+  if(!canBook(m,fD.date,null)){toast("No disponible esa fecha","err");return;}
+  if(new Date(fD.date+"T"+fD.time)<TODAY){toast("Esa fecha ya paso","err");return;}
+  if(workerHasMachineOnDate(cu.id,fD.mid,fD.date,null)){toast("Ya tienes esta maquina ese dia","err");return;}
+  var btn=document.getElementById("btnConfirm");
+  if(btn){btn.disabled=true;btn.textContent="Guardando...";btn.style.opacity=".6";}
+  try {
+    // Validacion final anti-doble reserva: consultar Airtable justo antes de crear
+    var checkRec = await atGetAll("Bookings");
+    var conflict = checkRec.some(function(r){
+      if(r.fields.MachineId!==fD.mid||r.fields.Returned===true)return false;
+      // Comprobar tambien turno noche del dia anterior
+      var prevDay=addDays(fD.date,-1);
+      var isNightPrev=parseInt((r.fields.StartTime||"0").split(":")[0])>=18;
+      return r.fields.StartDate===fD.date || (isNightPrev && r.fields.StartDate===prevDay);
+    });
+    if(conflict){
+      var b=document.getElementById("btnConfirm");
+      if(b){b.disabled=false;b.textContent="Confirmar Reserva";b.style.opacity="";}
+      toast("Alguien acaba de reservar esta maquina. Elige otra fecha o maquina.","err");
+      await loadAll();
+      return;
+    }
+    var rec=await atCreate("Bookings",{
+      Name:`${m.name} - ${cu.name} - ${fD.date}`,
+      MachineId:fD.mid, WorkerId:cu.id,
+      StartDate:fD.date, StartTime:fD.time,
+      Comment:comment, Returned:false
+    });
+    BOOKINGS.push({id:rec.id,machineId:fD.mid,wid:cu.id,machineName:m.name,workerName:cu.name,startDate:fD.date,startTime:fD.time,comment,returned:false,retDate:"",retTime:"",retCond:"",retLoc:"",retNotes:""});
+    fD={date:"",time:"",mid:null,comment:""};
+    view="mybookings"; render(); toast("Reserva creada ✓");
+  } catch(e){
+    console.error("[CleanFleet] submitBook:", e.message);
+    var b=document.getElementById("btnConfirm");
+    if(b){b.disabled=false;b.textContent="Confirmar Reserva";b.style.opacity="";}
+    toast("Error al crear reserva: "+e.message,"err");
+  }
+}
+
+async function submitReturn() {
+  var loc=getFinalLoc();
+  if(!retF.bid||!retF.cond||!loc){var e=document.getElementById("re");if(e){e.style.display="block";e.textContent="Completa todos los campos.";}return;}
+  var b=BOOKINGS.find(x=>x.id===retF.bid);if(!b)return;
+  if((retF.date+"T"+retF.time)<(b.startDate+"T"+b.startTime)){var e=document.getElementById("re");if(e){e.style.display="block";e.textContent="La devolucion no puede ser anterior al inicio.";}return;}
+  modal={t:"confirmRet",data:{bid:retF.bid,cond:retF.cond,loc,notes:retF.notes,date:retF.date,time:retF.time}};render();
+}
+
+async function doReturn(data) {
+  var b=BOOKINGS.find(x=>x.id===data.bid);if(!b)return;
+  try {
+    await atUpdate("Bookings",data.bid,{Returned:true,RetDate:data.date,RetTime:data.time,RetCondition:data.cond,RetLocation:data.loc,RetNotes:data.notes||""});
+    await atUpdate("Machines",b.machineId,{Condition:data.cond,Location:data.loc,Notes:data.notes||""});
+    BOOKINGS=BOOKINGS.map(x=>x.id!==data.bid?x:{...x,returned:true,retDate:data.date,retTime:data.time,retCond:data.cond,retLoc:data.loc,retNotes:data.notes});
+    MACHINES=MACHINES.map(x=>x.id!==b.machineId?x:{...x,cond:data.cond,loc:data.loc,notes:data.notes||x.notes});
+    retF={bid:"",cond:"",locP:"",locC:"",locMode:"",notes:"",date:T,time:TT};
+    modal=null;render();toast("Devolucion registrada ✓");
+  } catch(e){toast("Error al registrar devolucion","err");}
+}
+
+async function saveEditB() {
+  if(!modal.reason){var e=document.getElementById("ee");if(e){e.style.display="block";e.textContent="El motivo es obligatorio.";}return;}
+  var b=BOOKINGS.find(x=>x.id===modal.bid);
+  try {
+    await atUpdate("Bookings",modal.bid,{StartDate:modal.startDate,StartTime:modal.startTime,Comment:"[Mod] "+modal.reason});
+    BOOKINGS=BOOKINGS.map(x=>x.id!==modal.bid?x:{...x,startDate:modal.startDate,startTime:modal.startTime,comment:"[Mod] "+modal.reason});
+    modal=null;render();toast("Reserva modificada ✓");
+  } catch(e){toast("Error al modificar","err");}
+}
+
+async function confirmCancB() {
+  if(!modal.reason){var e=document.getElementById("ce");if(e){e.style.display="block";e.textContent="El motivo es obligatorio.";}return;}
+  try {
+    await atDelete("Bookings",modal.bid);
+    BOOKINGS=BOOKINGS.filter(x=>x.id!==modal.bid);
+    modal=null;render();toast("Reserva cancelada ✓");
+  } catch(e){toast("Error al cancelar","err");}
+}
+
+async function addMachine() {
+  if(!cu||!cu.isAdmin){toast("Solo el encargado puede añadir maquinas","err");return;}
+  if(!newMachine.name.trim()){toast("Introduce el nombre","err");return;}
+  try {
+    var rec=await atCreate("Machines",{Name:newMachine.name.trim(),Type:newMachine.type,Location:newMachine.loc,Condition:"Lista para usar",Notes:newMachine.notes||"",Active:true});
+    MACHINES.push({id:rec.id,name:newMachine.name.trim(),type:newMachine.type,loc:newMachine.loc,cond:"Lista para usar",notes:newMachine.notes||"",active:true});
+    newMachine={name:"",type:"Fregadora",loc:"Almacen central",notes:""};
+    modal=null;render();toast("Maquina añadida ✓");
+  } catch(e){toast("Error al añadir maquina","err");}
+}
+
+async function toggleMachine(id) {
+  if(!cu||!cu.isAdmin){toast("Solo el encargado puede dar de baja maquinas","err");return;}
+  var m=MACHINES.find(x=>x.id===id);
+  if(BOOKINGS.some(b=>b.machineId===id&&!b.returned)){toast("Tiene reservas activas, cancelalas primero","err");return;}
+  modal={t:"confirmBaja",mid:id,name:m.name};render();
+}
+async function doDeleteMachine(id) {
+  try {
+    await atDelete("Machines",id);
+    MACHINES=MACHINES.filter(x=>x.id!==id);
+    modal=null;render();toast("Maquina dada de baja correctamente");
+  } catch(e){toast("Error al dar de baja","err");}
+}
+
+function openEditMachineState(id) {
+  if(!cu||!cu.isAdmin){toast("Solo el encargado puede cambiar el estado","err");return;}
+  var m=MACHINES.find(x=>x.id===id);
+  modal={t:"editMachineState",mid:id,name:m.name,cond:m.cond,notes:m.notes||""};
+  render();
+}
+
+async function saveEditMachineState() {
+  if(!modal.cond){var e=document.getElementById("ems");if(e){e.style.display="block";e.textContent="Selecciona un estado.";}return;}
+  try {
+    await atUpdate("Machines",modal.mid,{Condition:modal.cond,Notes:modal.notes||""});
+    MACHINES=MACHINES.map(x=>x.id!==modal.mid?x:{...x,cond:modal.cond,notes:modal.notes});
+    modal=null;render();toast("Estado de maquina actualizado correctamente");
+  } catch(e){toast("Error al actualizar estado","err");}
+}
+
+async function resolveIssue(id) {
+  if(!cu||!cu.isAdmin){toast("Solo el encargado puede resolver averias","err");return;}
+  try {
+    await atUpdate("Machines",id,{Condition:"Lista para usar",Notes:""});
+    MACHINES=MACHINES.map(x=>x.id!==id?x:{...x,cond:"Lista para usar",notes:""});
+    modal=null;render();toast("Averia resuelta ✓");
+  } catch(e){toast("Error","err");}
+}
+
+async function addUser() {
+  if(!cu||!cu.isAdmin){toast("Solo el encargado puede añadir trabajadores","err");return;}
+  if(!newUser.name.trim()||newUser.pin.length!==4){toast("Nombre y PIN de 4 digitos requeridos","err");return;}
+  if(USERS.some(u=>u.pin===newUser.pin)){toast("PIN ya en uso","err");return;}
+  var ini=newUser.name.trim().split(" ").map(w=>w[0]||"").join("").slice(0,2).toUpperCase();
+  try {
+    var rec=await atCreate("Users",{Name:newUser.name.trim(),Pin:newUser.pin,IsAdmin:false,Initials:ini});
+    USERS.push({id:rec.id,name:newUser.name.trim(),pin:newUser.pin,isAdmin:false,ini});
+    newUser={name:"",pin:""};modal=null;render();toast("Trabajador añadido ✓");
+  } catch(e){toast("Error al añadir trabajador","err");}
+}
+
+async function removeUser(id) {
+  if(!cu||!cu.isAdmin){toast("Solo el encargado puede eliminar trabajadores","err");return;}
+  if(BOOKINGS.some(b=>b.wid===id&&!b.returned)){toast("Tiene reservas activas","err");return;}
+  try {
+    await atDelete("Users",id);
+    USERS=USERS.filter(x=>x.id!==id);
+    render();toast("Trabajador eliminado");
+  } catch(e){toast("Error","err");}
+}
+
+// -- CALENDARIO --
+function booksOnDate(date,filterMid) {
+  return BOOKINGS.filter(b=>{
+    if(b.returned)return false;
+    if(filterMid!=="Todas"&&b.machineId!==filterMid)return false;
+    return bookingDates(b).indexOf(date)!==-1;
+  });
+}
+function calDot(date) {
+  var active=MACHINES.filter(m=>m.active&&!isBroken(m)).length;
+  if(!active)return null;
+  var booked=new Set(booksOnDate(date,"Todas").map(b=>b.machineId));
+  var cnt=MACHINES.filter(m=>m.active&&!isBroken(m)&&booked.has(m.id)).length;
+  if(!cnt)return null;
+  var free=MACHINES.filter(m=>m.active&&!isBroken(m)&&!booked.has(m.id)).length;
+  return free===0?"#dc2626":"#d97706";
+}
+
+// ======================================================
+// RENDER VISTAS
+// ======================================================
+
+function rSetup() {
+  return `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f5f5f5,#e8f4ff);padding:20px">
+  <div class="setup-card">
+    <div style="font-size:32px;margin-bottom:8px">🏭</div>
+    <div style="font-weight:700;font-size:20px;margin-bottom:4px">CleanFleet</div>
+    <div style="color:#999;font-size:13px;margin-bottom:24px">Configura tus credenciales de Airtable para comenzar</div>
+
+    <div style="background:#fff5f5;border:1px solid #fca5a5;border-radius:10px;padding:14px;margin-bottom:20px">
+      <div style="font-weight:700;font-size:12px;color:#dc2626;margin-bottom:8px">⚠️ Credenciales no configuradas</div>
+      <div style="font-size:12px;color:#666">Abre el archivo <strong>index.html</strong> con un editor de texto y reemplaza los valores marcados con:</div>
+    </div>
+
+    <div class="setup-step">
+      <div class="setup-num">1</div>
+      <div>
+        <div style="font-weight:600;font-size:13px">Reemplaza TU_AIRTABLE_TOKEN</div>
+        <div style="font-size:11px;color:#999">Tu token empieza por "pat..." — encuéntralo en airtable.com/create/tokens</div>
+      </div>
+    </div>
+    <div class="setup-step">
+      <div class="setup-num">2</div>
+      <div>
+        <div style="font-weight:600;font-size:13px">Reemplaza TU_BASE_ID</div>
+        <div style="font-size:11px;color:#999">Tu Base ID empieza por "app..." — está en la URL de tu base de Airtable</div>
+      </div>
+    </div>
+    <div class="setup-step">
+      <div class="setup-num">3</div>
+      <div>
+        <div style="font-weight:600;font-size:13px">Guarda y sube de nuevo a Netlify</div>
+        <div style="font-size:11px;color:#999">Arrastra la carpeta con el index.html actualizado</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;padding:12px;background:#f9f9f9;border-radius:8px;font-size:11px;color:#666;font-family:monospace">
+      var AIRTABLE_TOKEN = "<span style="color:#2563eb">pat_tu_token_aqui</span>";<br>
+      var BASE_ID = '<span style="color:#16a34a">app_tu_base_id_aqui</span>';'
+    </div>
+  </div></div>`;
+}
+
+function rLogin() {
+  if(appLoading) return `<div class="lw"><div class="lc">
+    <div style="font-size:32px;margin-bottom:12px">🏭</div>
+    <div class="loading"><div class="spinner"></div><span style="font-size:13px">Cargando datos...</span></div>
+  </div></div>`;
+
+  if(!loginState.uid) return `<div class="lw"><div class="lc">
+    <div style="font-size:32px;margin-bottom:8px">🏭</div>
+    <div style="font-weight:700;font-size:20px;margin-bottom:4px">CleanFleet</div>
+    <div style="color:#999;font-size:13px;margin-bottom:20px">Sistema de gestion de maquinaria</div>
+    ${USERS.map(u=>`<button class="wb ${u.isAdmin?"ab":""}" onclick="selectUser('${u.id}')">
+    <div class="av ${u.isAdmin?"admin":""}">${u.ini}</div>${u.name}
+    ${u.isAdmin?'<span class="admin-badge">Admin</span>':''}
+    </button>`).join("")}
+  </div></div>`;
+
+  var user=USERS.find(u=>u.id===loginState.uid);
+  return `<div class="lw"><div class="lc">
+  <button class="btn" style="margin-bottom:16px;font-size:11px" onclick="backLogin()">← Volver</button>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+  <div class="av ${user.isAdmin?"admin":""}" style="width:40px;height:40px;font-size:14px">${user.ini}</div>
+  <div><div style="font-weight:700;font-size:16px">${user.name}</div>
+  <div style="font-size:12px;color:#999">Introduce tu PIN de 4 digitos</div></div></div>
+  <div class="pin-box">${[0,1,2,3].map(i=>`<input class="pin-digit" id="p${i}" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" autocorrect="off" value="${loginState.pin[i]||""}" oninput="pinInput(${i},this.value)" onkeydown="if(event.key==='Backspace'&&!this.value&&${i}>0)document.getElementById('p${i-1}').focus()">`).join("")}</div>
+  ${loginState.err?`<div style="text-align:center;color:#dc2626;font-size:12px;padding:8px;background:#fff5f5;border-radius:8px;margin-bottom:10px">${loginState.err}</div>`:""}
+  <div style="text-align:center;font-size:11px;color:#999">Se confirma al completar los 4 digitos</div>
+  </div></div>`;
+}
+
+function rNav() {
+  var items=cu.isAdmin?
+    [["dashboard","📊","Panel"],["calendar","📅","Calendario"],["allbookings","📋","Reservas"],["machines","🔧","Maquinas"],["returns","📦","Devoluciones"],["admin","⚙️","Admin"]]:
+    [["dashboard","📊","Panel"],["calendar","📅","Calendario"],["book","➕","Reservar"],["mybookings","📋","Mis Reservas"],["machines","🔧","Maquinas"],["returns","📦","Devoluciones"]];
+  var broken=MACHINES.filter(m=>m.active&&(machineStatus(m)==="averiada"||machineStatus(m)==="mantenimiento")).length;
+  return `<nav class="nav"><div style="display:flex">
+  ${items.map(x=>`<button class="nb ${view===x[0]?"on":""}" onclick="setV('${x[0]}')"><span style="font-size:14px">${x[1]}</span>${x[2]}</button>`).join("")}
+  </div><div class="nav-right" style="display:flex;align-items:center;gap:8px;padding:0 4px">
+  ${cu.isAdmin?'<span class="admin-badge">Admin</span>':""}
+  ${broken>0?`<span class="bdg" style="background:#fff5f5;color:#dc2626;cursor:pointer;border:1px solid #fca5a5" onclick="setV('admin')">⚠️ ${broken}</span>`:""}
+  <div class="av ${cu.isAdmin?"admin":""}">${cu.ini}</div>
+  <span class="nav-user-name" style="font-size:11px;color:#999">${cu.name.split(" ")[0]}</span>
+  <button class="btn" style="padding:4px 9px;font-size:10px" onclick="logout()">Salir</button>
+  </div></nav>`;
+}
+
+function rDash() {
+  var broken=MACHINES.filter(m=>m.active&&isBroken(m));
+  var inUseToday=BOOKINGS.filter(b=>!b.returned&&b.startDate<=T);
+  var myNow=cu.isAdmin?[]:BOOKINGS.filter(b=>b.wid===cu.id&&!b.returned&&b.startDate<=T);
+  var myFut=cu.isAdmin?[]:BOOKINGS.filter(b=>b.wid===cu.id&&!b.returned&&b.startDate>T).sort((a,b)=>a.startDate>b.startDate?1:-1);
+  var opCount=MACHINES.filter(m=>m.active&&!isBroken(m)).length;
+  var overdue=cu&&cu.isAdmin?getOverdueBookings():[];
+  return `<div style="font-size:20px;font-weight:700;margin-bottom:2px">${cu.isAdmin?"Panel de Control":"Hola, "+cu.name.split(" ")[0]}</div>
+  <div style="font-size:13px;color:#999;margin-bottom:18px">${T} · ${TT}</div>
+  <div class="stats-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+  ${[["Flota activa",MACHINES.filter(m=>m.active).length,"#1a1a1a","🏭"],
+     ["Operativas",opCount,"#16a34a","✅"],
+     ["En uso hoy",inUseToday.length,"#2563eb","🔄"],
+     ["No operativas",broken.length,"#dc2626","⚠️"]
+  ].map(s=>`<div class="stat"><div style="font-size:16px">${s[3]}</div><div style="font-size:24px;font-weight:700;color:${s[2]};margin-top:2px">${s[1]}</div><div style="font-size:11px;color:#999">${s[0]}</div></div>`).join("")}
+  </div>
+  ${broken.length?`<div class="aw" onclick="setV('admin')"><span style="font-size:12px;font-weight:600;color:#d97706">⚠️ ${broken.length} no operativa${broken.length>1?"s":""}</span><span style="font-size:12px;color:#999">Resolver en Admin →</span></div>`:""}
+  ${overdue.length?`<div style="background:#fff5f5;border:1px solid #fca5a5;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;cursor:pointer" onclick="setV('allbookings')"><span style="font-size:12px;font-weight:600;color:#dc2626">🔴 ${overdue.length} reserva${overdue.length>1?"s":""} sin devolver hace +7 dias</span><span style="font-size:12px;color:#999">Ver →</span></div>`:""}
+  ${myNow.length?`<div class="sh" style="margin-top:4px">EN USO HOY</div><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+  ${myNow.map(b=>{var m=MACHINES.find(x=>x.id===b.machineId);var night=parseInt(b.startTime)>=18;var dias=badgeDias(b.startDate);return`<div class="card" style="display:flex;align-items:center;gap:10px;border-left:3px solid #2563eb"><div style="width:36px;height:36px;background:#f5f5f5;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px">${m?ICO[m.type]:"🔧"}</div><div style="flex:1"><div style="font-weight:600;font-size:13px">${m?m.name:""}${night?" 🌙":""}</div><div style="color:#999;font-size:11px">${b.startDate} · ${b.startTime}</div>${dias?`<div style="margin-top:4px">${dias}</div>`:""}</div><button class="btn btns" style="font-size:10px;padding:5px 10px" onclick="openReturnModal('${b.id}')">📦 Devolver</button></div>`;}).join("")}
+  </div>`:""}
+  ${myFut.length?`<div class="sh">PROXIMAS</div><div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px">
+  ${myFut.slice(0,3).map(b=>{var m=MACHINES.find(x=>x.id===b.machineId);return`<div class="card" style="display:flex;align-items:center;gap:10px;border-left:3px solid #16a34a"><div style="width:36px;height:36px;background:#f5f5f5;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px">${m?ICO[m.type]:"🔧"}</div><div style="flex:1"><div style="font-weight:600;font-size:13px">${m?m.name:""}</div><div style="color:#999;font-size:11px">${b.startDate} · ${b.startTime}</div></div><span class="future-badge">Futura</span></div>`;}).join("")}
+  </div>`:""}
+  <div class="sh">FLOTA HOY</div>
+  <div class="fleet-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px">
+  ${MACHINES.filter(m=>m.active).map(m=>{var s=machineStatus(m);var au=getActiveUser(m.id);
+    return`<div class="card" style="cursor:pointer;transition:box-shadow .15s" onclick="openMD('${m.id}')" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow=''">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><span style="font-size:20px">${ICO[m.type]}</span>${sbdg(s)}</div>
+    <div style="font-weight:600;font-size:13px;margin-bottom:1px">${m.name}</div>
+    <div style="font-size:10px;color:#999;margin-bottom:3px">📍 ${m.loc}</div>
+    ${au?`<div style="font-size:10px;color:#2563eb">👤 ${au.name}</div>`:""}
+    </div>`;}).join("")}
+  </div>`;
+}
+
+function rCal() {
+  var dim=new Date(calM.getFullYear(),calM.getMonth()+1,0).getDate();
+  var fd=new Date(calM.getFullYear(),calM.getMonth(),1).getDay();
+  var off=fd===0?6:fd-1;
+  var ml=calM.toLocaleDateString("es-ES",{month:"long",year:"numeric"}).replace(/^\w/,c=>c.toUpperCase());
+  var dayBks=booksOnDate(calS,calF);
+  var bookedIds=new Set(dayBks.map(b=>b.machineId));
+  var availM=MACHINES.filter(m=>m.active&&!isBroken(m)&&!bookedIds.has(m.id));
+  var sl=new Date(calS+"T12:00").toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"}).replace(/^\w/,c=>c.toUpperCase());
+  var fo=["Todas"].concat(MACHINES.filter(m=>m.active&&!isBroken(m)).map(m=>m.id));
+
+  return `<div style="font-size:20px;font-weight:700;margin-bottom:2px">Calendario</div>
+  <div style="font-size:13px;color:#999;margin-bottom:18px">🟠 ocupacion parcial · 🔴 todo ocupado · 🌙 turno noche</div>
+  <div style="display:grid;grid-template-columns:1fr 295px;gap:16px" class="cal-grid">
+  <div class="card">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+  <button class="btn" onclick="prevM()">‹</button>
+  <span style="font-weight:700;font-size:15px">${ml}</span>
+  <button class="btn" onclick="nextM()">›</button>
+  </div>
+  <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">
+  ${fo.map(f=>{var isA=f==="Todas";var m2=!isA&&MACHINES.find(x=>x.id===f);return`<button class="tag ${calF===f?"on":""}" onclick="setCF('${f}')">${isA?"Todas":(m2?ICO[m2.type]+" "+m2.name:f)}</button>`;}).join("")}
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px">
+  ${["L","M","X","J","V","S","D"].map(d=>`<div style="text-align:center;font-size:10px;font-weight:700;color:#999;padding:3px 0">${d}</div>`).join("")}
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">
+  ${Array.from({length:off}).map(()=>"<div></div>").join("")}
+  ${Array.from({length:dim},(_,i)=>{
+    var d=new Date(calM.getFullYear(),calM.getMonth(),i+1);
+    var ds=fmt(d);var isT=ds===T,isS=ds===calS;
+    var isPast=d<new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate());
+    var dot=calDot(ds);
+    return`<div class="cd${isS?" sel":isT?" tod":""}${isPast&&!isS?" pst":""}" onclick="setCS('${ds}')">
+    ${i+1}${dot?`<span class="cdot" style="background:${dot}"></span>`:""}
+    </div>`;}).join("")}
+  </div>
+  <div style="display:flex;gap:16px;margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0">
+  ${[["#d97706","Parcial"],["#dc2626","Todo ocupado"]].map(x=>`<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#999"><span style="width:8px;height:8px;border-radius:50%;background:${x[0]};display:inline-block"></span>${x[1]}</div>`).join("")}
+  </div></div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+  <div class="card">
+  <div style="font-weight:700;font-size:13px;margin-bottom:3px">📅 ${sl}</div>
+  <div style="font-size:11px;color:#999;margin-bottom:12px">${dayBks.length} reserva${dayBks.length!==1?"s":""} · ${availM.length} libre${availM.length!==1?"s":""}</div>
+  ${dayBks.length===0?'<div style="color:#999;font-size:12px;text-align:center;padding:12px 0">Sin reservas</div>':
+  dayBks.map(b=>{var m=MACHINES.find(x=>x.id===b.machineId);var w=USERS.find(x=>x.id===b.wid);var night=parseInt(b.startTime)>=18;var spill=night&&b.startDate!==calS;
+    return`<div style="background:#f9f9f9;border-radius:9px;padding:9px 11px;margin-bottom:6px;border-left:3px solid ${spill?"#d97706":"#2563eb"}">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><span style="font-size:14px">${m?ICO[m.type]:"🔧"}</span><span style="font-weight:600;font-size:12px">${m?m.name:""}${night?" 🌙":""}</span></div>
+    <div style="font-size:11px;color:#999">👤 ${w?w.name:""}</div>
+    <div style="font-size:10px;color:#aaa">${spill?"Cont. desde "+b.startDate:b.startTime}</div>
+    </div>`;}).join("")}
+  </div>
+  <div class="card">
+  <div style="font-size:10px;font-weight:700;color:#999;letter-spacing:.8px;margin-bottom:10px">DISPONIBLES</div>
+  ${availM.length===0?'<div style="color:#999;font-size:11px;text-align:center;padding:8px 0">Todas en uso</div>':
+  availM.map(m=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f5f5f5"><span style="font-size:14px">${ICO[m.type]}</span><div style="flex:1"><div style="font-size:12px;font-weight:600">${m.name}</div><div style="font-size:10px;color:#999">📍 ${m.loc}</div></div><span class="bdg" style="background:#f0fdf4;color:#16a34a">Libre</span></div>`).join("")}
+  </div></div></div>`;
+}
+
+function rBook() {
+  var dateReady=!!(fD.date);
+  var isPast=!!(fD.date&&fD.time&&new Date(fD.date+"T"+fD.time)<TODAY);
+  var isToday=fD.date===T;
+  var isNight=fD.time&&parseInt(fD.time.split(":")[0])>=18;
+
+  var rows=MACHINES.filter(m=>m.active).map(m=>{
+    var broken=isBroken(m);
+    var takenByOther=dateReady?reservedOnDate(m.id,fD.date,null):false;
+    var myThatDay=fD.date?workerHasMachineOnDate(cu.id,m.id,fD.date,null):false;
+    var avail=!broken&&!takenByOther&&!myThatDay;
+    return{m,broken,takenByOther,myThatDay,avail,sel:fD.mid===m.id};
+  });
+  var avCount=rows.filter(r=>r.avail).length;
+  var selM=fD.mid?MACHINES.find(x=>x.id===fD.mid):null;
+  var ready=!!(fD.date&&fD.time&&fD.mid&&!isPast);
+
+  var timeSel='<label class="lbl">Hora de inicio *</label>';
+  if(!fD.date){
+    timeSel+='<div style="font-size:11px;color:#999;padding:8px 0">Elige primero la fecha</div>';
+  } else {
+    var minTime=isToday?(pad(TODAY.getHours())+":"+pad(TODAY.getMinutes())):"00:00";
+    timeSel+=`<input class="inp" type="time" ${isToday?`min="${minTime}"`:""}  value="${fD.time}" onchange="setBookTime(this.value)" style="margin-top:4px">`;
+    if(isNight&&!isPast) timeSel+=`<div style="margin-top:8px;font-size:11px;color:#2563eb;padding:7px 10px;background:#eff6ff;border-radius:8px">Turno noche - bloquea tambien el dia siguiente</div>`;
+  }
+
+  var machineBlock=`<div class="card"><div style="font-weight:700;font-size:13px;margin-bottom:8px">2. Elige maquina</div>
+  ${!dateReady?'<div class="hint" style="margin-top:8px">Primero elige la fecha</div>':
+  `<div style="font-size:11px;color:#999;margin-bottom:11px">${avCount} libre${avCount!==1?"s":""} el ${fD.date}</div>
+  ${rows.map(r=>{var m=r.m;var cls=`mopt${r.sel?" selopt":r.avail?" avail":r.broken?" broken":" taken"}`;var oc=(r.avail||r.sel)?`onclick="selectMachine('${m.id}')"`:"";var reason=r.broken?machineStatus(m):r.myThatDay?"Ya la tienes ese dia":r.takenByOther?"Reservada ese dia":"";
+    return`<div class="${cls}" ${oc}><div style="width:34px;height:34px;background:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">${ICO[m.type]}</div><div style="flex:1"><div style="font-weight:600;font-size:13px">${m.name}</div><div style="font-size:10px;color:#999">📍 ${m.loc}${reason?` · <span style="color:#dc2626">${reason}</span>`:""}</div></div>${r.sel?'<span class="bdg" style="background:#eff6ff;color:#2563eb">OK</span>':r.avail?'<span class="bdg" style="background:#f0fdf4;color:#16a34a">Libre</span>':r.broken?sbdg(machineStatus(m)):'<span class="bdg" style="background:#fff5f5;color:#dc2626">Reservada</span>'}</div>`;}).join("")}`}
+  </div>`;
+
+  return `<div style="font-size:20px;font-weight:700;margin-bottom:2px">Nueva Reserva</div>
+  <div style="font-size:13px;color:#999;margin-bottom:18px">Como: <strong>${cu.name}</strong></div>
+  <div style="display:grid;grid-template-columns:290px 1fr;gap:18px;align-items:start" class="book-grid">
+  <div style="display:flex;flex-direction:column;gap:12px">
+  <div class="card"><div style="font-weight:700;font-size:13px;margin-bottom:14px">1. Fecha y hora de inicio</div>
+  <div style="margin-bottom:13px"><label class="lbl">Fecha *</label><input class="inp" type="date" min="${T}" value="${fD.date}" onchange="setBookDate(this.value)"></div>
+  ${timeSel}${isPast?'<div style="margin-top:8px;font-size:11px;color:#dc2626">Esa hora ya paso</div>':''}
+  </div>
+  <div class="book-machine-mobile">${machineBlock}</div>
+  ${ready&&selM?`<div class="card" style="border-color:#86efac;background:#f0fdf4">
+  <div style="font-size:10px;color:#16a34a;font-weight:700;margin-bottom:10px">OK RESUMEN</div>
+  <div class="ir"><span class="il">Maquina</span><span style="font-size:12px;font-weight:600">${selM.name}</span></div>
+  <div class="ir"><span class="il">Inicio</span><span style="font-size:12px">${fD.date} - ${fD.time}</span></div>
+  <div class="ir"><span class="il">Ubicacion</span><span style="font-size:12px">📍 ${selM.loc}</span></div>
+  ${isNight?'<div class="ir"><span class="il">Tipo</span><span style="font-size:12px">Turno noche</span></div>':""}
+  </div>`:""}
+  <div class="card"><div style="font-weight:700;font-size:13px;margin-bottom:10px">3. Comentario</div>
+  <textarea class="inp" id="bComment" rows="3" placeholder="Opcional: zona, tarea..." oninput="fD.comment=this.value" style="resize:none">${fD.comment}</textarea></div>
+  <div class="sticky-confirm"><button id="btnConfirm" class="btn ${ready?"btnp":""}" onclick="${ready?"submitBook()":"toast('Completa todos los pasos','err')"}" style="padding:12px;font-size:13px;width:100%;${ready?"":"opacity:.4;cursor:not-allowed"}">${ready?"Confirmar Reserva":"Completa los pasos"}</button></div>
+  </div>
+  <div class="book-machine-desktop">${machineBlock}</div></div>`;
+}
+
+function rMine() {
+  var mine=BOOKINGS.filter(b=>b.wid===cu.id);
+  var enUso=mine.filter(b=>!b.returned&&b.startDate<=T).sort((a,b)=>a.startDate>b.startDate?1:-1);
+  var fut=mine.filter(b=>!b.returned&&b.startDate>T).sort((a,b)=>a.startDate>b.startDate?1:-1);
+  var hist=mine.filter(b=>b.returned).sort((a,b)=>a.retDate<b.retDate?1:-1);
+  if(!mine.length) return`<div style="font-size:20px;font-weight:700;margin-bottom:18px">Mis Reservas</div><div class="card" style="text-align:center;padding:40px;color:#999"><div style="font-size:32px;margin-bottom:8px">📭</div><p style="font-weight:600">No tienes reservas</p><button class="btn btnp" style="margin-top:14px" onclick="setV('book')">Hacer una reserva</button></div>`;
+
+  function bCard(b,showActions){
+    var m=MACHINES.find(x=>x.id===b.machineId);var s=bState(b);var night=parseInt(b.startTime)>=18;
+    var bc=s==="en_uso"?"#2563eb":s==="futura"?"#16a34a":"#e5e5e5";
+    var dias=s==="en_uso"?badgeDias(b.startDate):"";
+    return`<div class="card" style="border-left:3px solid ${bc}">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+    <div style="display:flex;gap:10px;flex:1">
+    <div style="width:38px;height:38px;background:#f5f5f5;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${m?ICO[m.type]:"🔧"}</div>
+    <div><div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+    <span style="font-weight:700;font-size:13px">${m?m.name:""}</span>
+    ${s==="en_uso"?'<span class="in-use-badge">En uso</span>':s==="futura"?'<span class="future-badge">Futura</span>':""}
+    ${night?'<span style="font-size:11px">🌙</span>':""}
+    </div>
+    <div style="color:#999;font-size:11px">Inicio: ${b.startDate} · ${b.startTime}</div>
+    <div style="font-size:10px;color:#aaa">📍 ${m?m.loc:""}</div>
+    ${b.comment?`<div style="font-size:10px;font-style:italic;color:#aaa">"${b.comment}"</div>`:""}
+    ${dias?`<div style="margin-top:4px">${dias}</div>`:""}
+    ${b.returned?`<div style="color:#aaa;font-size:11px;margin-top:3px">Devuelta: ${b.retDate} ${b.retTime} · 📍 ${b.retLoc}</div>${b.retCond?cbdg(b.retCond):""}`:""}</div></div>
+    ${showActions?`<div class="bcard-actions" style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
+    ${s==="en_uso"?`<button class="btn btns" style="font-size:10px;padding:5px 10px" onclick="openReturnModal('${b.id}')">📦 Devolver</button>`:""}
+    <button class="btn btnw" style="font-size:10px;padding:5px 10px" onclick="openEditB('${b.id}')">Modificar</button>
+    <button class="btn btnd" style="font-size:10px;padding:5px 10px" onclick="openCancB('${b.id}')">Cancelar</button>
+    </div>`:""}
+    </div></div>`;
+  }
+  return`<div style="font-size:20px;font-weight:700;margin-bottom:2px">Mis Reservas</div>
+  <div style="font-size:13px;color:#999;margin-bottom:18px">Solo gestionas tus propias reservas</div>
+  ${enUso.length?`<div class="sh">EN USO HOY (${enUso.length})</div><div style="display:flex;flex-direction:column;gap:9px;margin-bottom:20px">${enUso.map(b=>bCard(b,true)).join("")}</div>`:""}
+  ${fut.length?`<div class="sh">PROXIMAS (${fut.length})</div><div style="display:flex;flex-direction:column;gap:9px;margin-bottom:20px">${fut.map(b=>bCard(b,true)).join("")}</div>`:""}
+  ${!enUso.length&&!fut.length?`<div class="card" style="text-align:center;padding:26px;color:#999;margin-bottom:18px"><p>No tienes reservas activas</p><button class="btn btnp" style="margin-top:12px" onclick="setV('book')">Hacer una reserva</button></div>`:""}
+  ${hist.length?`<div class="sh">HISTORIAL (${hist.length})</div><div style="display:flex;flex-direction:column;gap:8px">${hist.map(b=>bCard(b,false)).join("")}</div>`:""}`;
+}
+
+function rMachines() {
+  var fm=fType==="Todas"?MACHINES.filter(m=>m.active):MACHINES.filter(m=>m.active&&m.type===fType);
+  return`<div style="font-size:20px;font-weight:700;margin-bottom:2px">Maquinas</div>
+  <div style="font-size:13px;color:#999;margin-bottom:16px">Estado actual — haz clic para ver detalle</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+  ${["Todas","Fregadora","Pulidora","Aspiradora","Otro"].map(f=>`<button class="tag ${fType===f?"on":""}" onclick="setFT('${f}')">${f}</button>`).join("")}
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px">
+  ${fm.map(m=>{var s=machineStatus(m);var au=getActiveUser(m.id);var lastRet=BOOKINGS.filter(b=>b.machineId===m.id&&b.returned).sort((a,b)=>a.retDate<b.retDate?1:-1)[0];
+    return`<div class="card" style="cursor:pointer;transition:box-shadow .15s" onclick="openMD('${m.id}')" onmouseover="this.style.boxShadow='0 4px 14px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow=''">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px"><span style="font-size:22px">${ICO[m.type]}</span>${sbdg(s)}</div>
+    <div style="font-weight:700;font-size:15px">${m.name}</div>
+    <div style="color:#999;font-size:11px;margin-top:1px;margin-bottom:10px">${m.type}</div>
+    <div style="background:#f9f9f9;border-radius:9px;padding:9px 11px">
+    <div class="ir"><span class="il">📍 Ubicacion</span><span style="font-size:11px;font-weight:600">${m.loc}</span></div>
+    <div class="ir"><span class="il">⚙️ Condicion</span>${cbdg(m.cond)}</div>
+    ${au?`<div class="ir"><span class="il">👤 En uso</span><span style="font-size:11px;color:#2563eb">${au.name}</span></div>`:""}
+    ${m.notes?`<div class="ir"><span class="il">📝 Notas</span><span style="font-size:10px;font-style:italic;color:#aaa">${m.notes}</span></div>`:""}
+    ${lastRet?`<div class="ir"><span class="il">🕐 Ultima dev.</span><span style="font-size:10px;color:#aaa">${lastRet.retDate} ${lastRet.retTime}</span></div>`:""}
+    </div></div>`;}).join("")}
+  </div>`;
+}
+
+function rReturns() {
+  var activeBk=cu.isAdmin?BOOKINGS.filter(b=>!b.returned):BOOKINGS.filter(b=>b.wid===cu.id&&!b.returned);
+  if(!activeBk.length) return`<div style="font-size:20px;font-weight:700;margin-bottom:18px">Devolucion</div><div class="card" style="text-align:center;padding:40px;color:#999"><div style="font-size:32px;margin-bottom:8px">📦</div><p style="font-weight:600">No hay maquinas pendientes</p><button class="btn btnp" style="margin-top:14px" onclick="setV('book')">Hacer una reserva</button></div>`;
+  var selB=retF.bid?BOOKINGS.find(b=>b.id===retF.bid):null;
+  var finalLoc=getFinalLoc();
+  return`<div style="font-size:20px;font-weight:700;margin-bottom:2px">Devolucion de Maquinas</div>
+  <div style="font-size:13px;color:#999;margin-bottom:18px">${cu.isAdmin?"Todas las reservas activas":"Tus reservas activas"}</div>
+  <div class="ret-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+  <div class="card" style="display:flex;flex-direction:column;gap:14px">
+  <div><label class="lbl">Selecciona la reserva *</label>
+  <div style="margin-top:7px;display:flex;flex-direction:column;gap:7px">
+  ${activeBk.map(b=>{var m=MACHINES.find(x=>x.id===b.machineId);var w=cu.isAdmin?USERS.find(x=>x.id===b.wid):null;var isSel=retF.bid===b.id;var isNow=b.startDate<=T;var night=parseInt(b.startTime)>=18;
+    return`<div onclick="retF.bid='${b.id}';render()" style="padding:11px 13px;border-radius:10px;border:${isSel?"2px solid #1a1a1a":"1px solid #e5e5e5"};background:${isSel?"#fff":"#f9f9f9"};cursor:pointer;display:flex;align-items:center;gap:10px">
+    <span style="font-size:19px">${m?ICO[m.type]:"🔧"}</span>
+    <div style="flex:1"><div style="font-weight:600;font-size:13px">${m?m.name:""}${night?" 🌙":""}</div>
+    <div style="font-size:11px;color:#999">${b.startDate} ${b.startTime}${w?" · 👤 "+w.name:""}</div></div>
+    ${isNow?'<span class="in-use-badge">En uso</span>':'<span class="future-badge">Futura</span>'}
+    ${isSel?'<span style="font-size:15px;margin-left:4px">✓</span>':""}
+    </div>`;}).join("")}
+  </div></div>
+  <div><label class="lbl">Fecha y hora de devolucion *</label>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:5px">
+  <input class="inp" type="date" max="${addDays(T,1)}" value="${retF.date}" onchange="retF.date=this.value;setTimeout(function(){render();},50)">
+  <input class="inp" type="time" value="${retF.time}" onchange="retF.time=this.value;setTimeout(function(){render();},50)">
+  </div>${selB?`<div style="margin-top:6px;font-size:11px;color:#999">Inicio: ${selB.startDate} · ${selB.startTime}</div>`:""}</div>
+  <div><label class="lbl">Estado al devolver *</label>
+  <div style="margin-top:5px">${CONDS.map(c=>`<span class="cond-opt ${retF.cond===c?condOnClass(c):""}" onclick="setRetCond('${c}')">${c}</span>`).join("")}</div></div>
+  <div><label class="lbl">Donde la dejas *</label>
+  <div style="margin-top:5px;margin-bottom:9px">${LOCS.map(l=>{var on=retF.locMode==="preset"&&retF.locP===l;return`<span class="loc-opt ${on?"on":""}" onclick="setRetLocP('${l}')">📍 ${l}${on?" ✓":""}</span>`;}).join("")}</div>
+  <input class="inp" placeholder="Otra ubicacion..." value="${retF.locC}" oninput="setRetLocC(this.value)" style="${retF.locMode==="custom"&&retF.locC?"border-color:#93c5fd":""}">
+  ${finalLoc?`<div style="margin-top:6px;font-size:11px;color:#16a34a">✓ <strong>${finalLoc}</strong></div>`:'<div style="margin-top:6px;font-size:11px;color:#aaa">Selecciona o escribe</div>'}</div>
+  <div><label class="lbl">Notas (opcional)</label>
+  <textarea class="inp" rows="2" placeholder="Ej: Filtro casi agotado..." oninput="retF.notes=this.value" style="resize:none">${retF.notes}</textarea></div>
+  <div class="errbx" id="re"></div>
+  <button class="btn btnp" onclick="submitReturn()" style="padding:12px">Revisar y confirmar</button>
+  </div>
+  <div><div class="infobx">Al confirmar, la condicion y ubicacion se actualizan automaticamente en Airtable.</div>
+  <div class="sh">HISTORIAL</div>
+  ${BOOKINGS.filter(b=>b.returned).length===0?'<div class="card" style="text-align:center;padding:22px;color:#999"><p style="font-size:12px">Sin devoluciones</p></div>':
+  BOOKINGS.filter(b=>b.returned).slice(0,5).map(b=>{var m=MACHINES.find(x=>x.id===b.machineId);var w=USERS.find(x=>x.id===b.wid);
+    return`<div class="card" style="margin-bottom:9px"><div style="display:flex;gap:10px"><div style="width:34px;height:34px;background:#f5f5f5;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${m?ICO[m.type]:"🔧"}</div><div><div style="font-weight:600;font-size:13px">${m?m.name:""}</div><div style="font-size:11px;color:#999">${w?w.name:""}</div><div style="font-size:10px;color:#aaa">${b.startDate} ${b.startTime} → ${b.retDate} ${b.retTime} · 📍 ${b.retLoc}</div>${b.retCond?`<div style="margin-top:3px">${cbdg(b.retCond)}</div>`:""}</div></div></div>`;}).join("")}
+  </div></div>`;
+}
+
+function rAllBookings() {
+  var enUso=BOOKINGS.filter(b=>!b.returned&&b.startDate<=T).sort((a,b)=>a.startDate>b.startDate?1:-1);
+  var fut=BOOKINGS.filter(b=>!b.returned&&b.startDate>T).sort((a,b)=>a.startDate>b.startDate?1:-1);
+  var hist=BOOKINGS.filter(b=>b.returned).sort((a,b)=>a.retDate<b.retDate?1:-1);
+  function row(b,sc){var m=MACHINES.find(x=>x.id===b.machineId);var w=USERS.find(x=>x.id===b.wid);var s=bState(b);var night=parseInt(b.startTime)>=18;var dias=s==="en_uso"?badgeDias(b.startDate):"";
+    return`<div class="card" style="display:flex;align-items:center;gap:10px;border-left:3px solid ${s==="en_uso"?"#2563eb":s==="futura"?"#16a34a":"#e5e5e5"};${s==="devuelta"?"opacity:.65;":""}margin-bottom:8px"><div style="width:36px;height:36px;background:#f5f5f5;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px">${m?ICO[m.type]:"🔧"}</div><div style="flex:1"><div style="font-weight:600;font-size:13px">${m?m.name:""}${night?" 🌙":""}</div><div style="color:#999;font-size:11px">${b.startDate} ${b.startTime} · 👤 ${w?w.name:""}</div>${dias?`<div style="margin-top:3px">${dias}</div>`:""}${b.returned?`<div style="font-size:10px;color:#aaa">Dev: ${b.retDate} ${b.retTime}</div>`:""}</div>${sc?`<button class="btn btnd" style="font-size:10px;padding:5px 9px" onclick="openCancB('${b.id}')">Cancelar</button>`:""}</div>`;}
+  return`<div style="font-size:20px;font-weight:700;margin-bottom:2px">Todas las Reservas</div>
+  <div style="font-size:13px;color:#999;margin-bottom:18px">Vista admin · ${BOOKINGS.length} total</div>
+  ${enUso.length?`<div class="sh">EN USO HOY (${enUso.length})</div>${enUso.map(b=>row(b,true)).join("")}`:
+  '<div class="card" style="text-align:center;padding:22px;color:#999;margin-bottom:14px"><p>No hay maquinas en uso hoy</p></div>'}
+  ${fut.length?`<div class="sh" style="margin-top:12px">FUTURAS (${fut.length})</div>${fut.map(b=>row(b,true)).join("")}`:""}
+  ${hist.length?`<div class="sh" style="margin-top:12px">HISTORIAL (${hist.length})</div>${hist.slice(0,10).map(b=>row(b,false)).join("")}`:""}`;
+}
+
+// Estado del exportador
+var exportFilter = "mensual";
+
+function exportCSV() {
+  var ahora = new Date();
+  var desde;
+  if(exportFilter==="quincenal"){
+    desde = new Date(ahora); desde.setDate(desde.getDate()-15);
+  } else if(exportFilter==="mensual"){
+    desde = new Date(ahora); desde.setMonth(desde.getMonth()-1);
+  } else if(exportFilter==="trimestral"){
+    desde = new Date(ahora); desde.setMonth(desde.getMonth()-3);
+  } else {
+    desde = new Date("2000-01-01");
+  }
+  var desdeStr = fmt(desde);
+
+  // Filtrar reservas del periodo
+  var filas = BOOKINGS.filter(function(b){
+    return b.startDate >= desdeStr;
+  });
+
+  if(!filas.length){ toast("No hay registros en ese periodo","err"); return; }
+
+  // Cabecera CSV
+  var cabecera = ["Maquina","Tipo","Trabajador","Fecha inicio","Hora inicio","Comentario","Devuelta","Fecha devolucion","Hora devolucion","Estado devolucion","Ubicacion devolucion","Notas devolucion"];
+  var esc = function(v){ return '"'+String(v||"").replace(/"/g,'""')+'"'; };
+
+  var lineas = [cabecera.map(esc).join(",")];
+  filas.forEach(function(b){
+    var m = MACHINES.find(function(x){return x.id===b.machineId;}) || {};
+    var w = USERS.find(function(x){return x.id===b.wid;}) || {};
+    var mName = m.name || b.machineName || "Maquina eliminada";
+    var wName = w.name || b.workerName || "Trabajador eliminado";
+    var fila = [
+      esc(mName),
+      esc(m.type||""),
+      esc(wName),
+      esc(b.startDate),
+      esc(b.startTime),
+      esc(b.comment||""),
+      esc(b.returned ? "Si" : "No"),
+      esc(b.retDate||""),
+      esc(b.retTime||""),
+      esc(b.retCond||""),
+      esc(b.retLoc||""),
+      esc(b.retNotes||"")
+    ];
+    lineas.push(fila.join(","));
+  });
+
+  var csv = lineas.join("\n");
+  var blob = new Blob(["\uFEFF"+csv], {type:"text/csv;charset=utf-8;"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  var periodoNombre = exportFilter==="quincenal"?"15dias":exportFilter==="mensual"?"1mes":exportFilter==="trimestral"?"3meses":"completo";
+  a.href = url;
+  a.download = "CleanFleet_registro_"+periodoNombre+"_"+T+".csv";
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("CSV descargado correctamente ✓");
+}
+
+function setExportFilter(f){ exportFilter=f; render(); }
+
+function rAdmin() {
+  if(!cu||!cu.isAdmin){view="dashboard";return rDash();}
+  var broken=MACHINES.filter(m=>m.active&&(machineStatus(m)==="averiada"||machineStatus(m)==="mantenimiento"));
+  return`<div style="font-size:20px;font-weight:700;margin-bottom:2px">Panel Admin</div>
+  <div style="font-size:13px;color:#999;margin-bottom:20px">Gestion completa del sistema</div>
+  <div class="admin-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+  <div>
+  <div class="sh">AVERIAS Y MANTENIMIENTO</div>
+  ${broken.length===0?'<div class="card" style="text-align:center;padding:18px;color:#999;margin-bottom:16px"><div style="font-size:20px;margin-bottom:5px">✅</div><p style="font-size:12px">Todas operativas</p></div>':
+  `<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+  ${broken.map(m=>{var s=machineStatus(m);return`<div class="card" style="border-color:${s==="averiada"?"#fca5a5":"#fcd34d"}"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">${ICO[m.type]}</span><div style="flex:1"><div style="font-weight:600;font-size:13px">${m.name}</div><div style="margin-top:3px">${sbdg(s)}</div>${m.notes?`<div style="font-size:11px;color:#aaa;margin-top:3px;font-style:italic">${m.notes}</div>`:""}</div>${cu.isAdmin?`<button class="btn btns" style="font-size:11px;padding:7px 11px;white-space:nowrap" onclick="resolveIssue('${m.id}')">✓ Resolver</button>`:`<span class="bdg" style="background:#fff5f5;color:#dc2626;font-size:10px">Solo encargado</span>`}</div></div>`;}).join("")}
+  </div>`}
+  <div class="sh">TRABAJADORES</div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+  ${USERS.filter(u=>!u.isAdmin).map(u=>{var activas=BOOKINGS.filter(b=>b.wid===u.id&&!b.returned);var enUso=activas.filter(b=>b.startDate<=T);
+    return`<div class="card"><div style="display:flex;align-items:center;gap:10px"><div class="av">${u.ini}</div><div style="flex:1"><div style="font-weight:600;font-size:13px">${u.name}</div><div style="font-size:11px;color:#999">${enUso.length?enUso.length+" en uso":activas.length?activas.length+" reserva"+(activas.length>1?"s":""):"Sin reservas"}</div></div><span class="bdg" style="background:#f0fdf4;color:#16a34a">Activo</span>${cu.isAdmin?`<button class="btn btnd" style="font-size:10px;padding:4px 9px" onclick="removeUser('${u.id}')">✕</button>`:""}</div></div>`;}).join("")}
+  </div>
+  ${cu.isAdmin?`<button class="btn" style="width:100%;font-size:12px" onclick="modal={t:'addUser'};render()">+ Añadir trabajador</button>`:""}
+  </div>
+  <div>
+  <div class="sh">MAQUINAS</div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+  ${MACHINES.map(m=>{var s=machineStatus(m);return`<div class="card"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:17px">${ICO[m.type]}</span><div style="flex:1"><div style="font-weight:600;font-size:13px">${m.name}</div><div style="font-size:11px;color:#999">${m.type} · 📍 ${m.loc}</div></div>${sbdg(s)}${cu.isAdmin?`<div style="display:flex;gap:5px;margin-left:5px"><button class="btn btnw" style="font-size:10px;padding:4px 9px" onclick="openEditMachineState('${m.id}')">Estado</button><button class="btn btnd" style="font-size:10px;padding:4px 9px" onclick="toggleMachine('${m.id}')">Dar de baja</button></div>`:""}</div></div>`;}).join("")}
+  </div>
+  ${cu.isAdmin?`<button class="btn" style="width:100%;font-size:12px;margin-bottom:18px" onclick="modal={t:'addMachine'};render()">+ Añadir maquina</button>`:""}
+
+  <div class="sh">EXPORTAR REGISTROS</div>
+  <div class="card">
+    <div style="font-size:13px;color:#666;margin-bottom:12px">Descarga un CSV con todas las reservas y devoluciones del periodo seleccionado. Compatible con Excel y Google Sheets.</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+      ${[["quincenal","Ultimos 15 dias"],["mensual","Ultimo mes"],["trimestral","Ultimos 3 meses"],["todo","Todo el historial"]].map(function(o){
+        return`<button class="tag ${exportFilter===o[0]?"on":""}" onclick="setExportFilter('${o[0]}')">${o[1]}</button>`;
+      }).join("")}
+    </div>
+    <div style="background:#f9f9f9;border-radius:9px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#666">
+      <div style="font-weight:600;color:#1a1a1a;margin-bottom:4px">El CSV incluye:</div>
+      Maquina · Trabajador · Fecha y hora inicio · Comentario · Estado devolucion · Ubicacion · Notas
+    </div>
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:9px;padding:9px 12px;margin-bottom:14px;font-size:12px;color:#16a34a">
+      📊 ${BOOKINGS.filter(function(b){
+        var ahora=new Date(),desde=new Date(ahora);
+        if(exportFilter==="quincenal")desde.setDate(desde.getDate()-15);
+        else if(exportFilter==="mensual")desde.setMonth(desde.getMonth()-1);
+        else if(exportFilter==="trimestral")desde.setMonth(desde.getMonth()-3);
+        else desde=new Date("2000-01-01");
+        return b.startDate>=fmt(desde);
+      }).length} reservas en el periodo seleccionado
+    </div>
+    <button class="btn btnp" onclick="exportCSV()" style="width:100%;padding:11px;font-size:13px">
+      ⬇️ Descargar CSV
+    </button>
+  </div>
+  </div>
+  </div>`;
+}
+
+function rModal() {
+  if(!modal) return "";
+  if(modal.t==="md"){
+    var m=MACHINES.find(x=>x.id===modal.id);var s=machineStatus(m);var au=getActiveUser(m.id);
+    var actBk=BOOKINGS.filter(b=>b.machineId===m.id&&!b.returned).sort((a,b)=>a.startDate>b.startDate?1:-1).slice(0,3);
+    var retBk=BOOKINGS.filter(b=>b.machineId===m.id&&b.returned).sort((a,b)=>a.retDate<b.retDate?1:-1).slice(0,3);
+    return`<div class="mbo" onclick="if(event.target===this)closeModal()"><div class="mod">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div style="font-size:26px">${ICO[m.type]}</div><div><div style="font-weight:700;font-size:17px">${m.name}</div><div style="color:#999;font-size:12px">${m.type}</div></div><div style="margin-left:auto">${sbdg(s)}</div></div>
+    <div style="background:#f9f9f9;border-radius:10px;padding:12px;margin-bottom:14px">
+    <div class="ir"><span class="il">📍 Ubicacion</span><span style="font-size:12px;font-weight:600">${m.loc}</span></div>
+    <div class="ir"><span class="il">⚙️ Condicion</span>${cbdg(m.cond)}</div>
+    ${au?`<div class="ir"><span class="il">👤 En uso por</span><span style="font-size:12px;color:#2563eb;font-weight:600">${au.name}</span></div>`:""}
+    ${m.notes?`<div class="ir"><span class="il">📝 Notas</span><span style="font-size:11px;font-style:italic;color:#aaa">${m.notes}</span></div>`:""}
+    </div>
+    ${actBk.length?`<div class="sh">RESERVAS ACTIVAS</div>${actBk.map(b=>{var w=USERS.find(x=>x.id===b.wid);var night=parseInt(b.startTime)>=18;return`<div style="background:#f9f9f9;border-radius:9px;padding:8px 11px;margin-bottom:5px;font-size:11px;border-left:2px solid #2563eb"><span style="font-weight:600">${w?w.name:""}</span> · ${b.startDate} ${b.startTime}${night?" 🌙":""}</div>`;}).join("")}`:""}
+    ${retBk.length?`<div class="sh" style="margin-top:12px">HISTORIAL</div>${retBk.map(b=>{var w=USERS.find(x=>x.id===b.wid);return`<div style="background:#f9f9f9;border-radius:9px;padding:8px 11px;margin-bottom:5px"><div style="font-size:11px;font-weight:600">${w?w.name:""}</div><div style="font-size:10px;color:#aaa">${b.startDate} ${b.startTime} → ${b.retDate} ${b.retTime} · 📍 ${b.retLoc}</div><div style="margin-top:3px">${cbdg(b.retCond)}</div></div>`;}).join("")}`:""}
+    ${cu.isAdmin&&(s==="averiada"||s==="mantenimiento")?`<button class="btn btns" style="width:100%;margin-top:12px;padding:10px" onclick="resolveIssue('${m.id}')">✓ Marcar como resuelta</button>`:""}
+    <button class="btn" style="width:100%;margin-top:9px" onclick="closeModal()">Cerrar</button>
+    </div></div>`;
+  }
+  if(modal.t==="confirmRet"){
+    var data=modal.data;var b=BOOKINGS.find(x=>x.id===data.bid);var m=MACHINES.find(x=>x.id===b.machineId);
+    return`<div class="mbo" onclick="if(event.target===this)closeModal()"><div class="mod">
+    <div style="font-size:28px;margin-bottom:9px">📦</div>
+    <div style="font-weight:700;font-size:16px;margin-bottom:4px">Confirmar devolucion</div>
+    <div style="color:#999;font-size:12px;margin-bottom:16px">Revisa antes de guardar en Airtable</div>
+    <div style="background:#f9f9f9;border-radius:10px;padding:12px;margin-bottom:16px">
+    <div class="ir"><span class="il">Maquina</span><span style="font-size:12px;font-weight:600">${m?m.name:""}</span></div>
+    <div class="ir"><span class="il">Inicio</span><span style="font-size:12px">${b.startDate} · ${b.startTime}</span></div>
+    <div class="ir"><span class="il">Devolucion</span><span style="font-size:12px">${data.date} · ${data.time}</span></div>
+    <div class="ir"><span class="il">Estado</span>${cbdg(data.cond)}</div>
+    <div class="ir"><span class="il">Ubicacion</span><span style="font-size:12px">📍 ${data.loc}</span></div>
+    ${data.notes?`<div class="ir"><span class="il">Notas</span><span style="font-size:12px;font-style:italic">${data.notes}</span></div>`:""}
+    </div>
+    <div style="display:flex;gap:9px"><button class="btn" onclick="closeModal()" style="flex:1">Corregir</button><button class="btn btnp" onclick="doReturn(modal.data)" style="flex:1">Confirmar ✓</button></div>
+    </div></div>`;
+  }
+  if(modal.t==="editB"){
+    var b=BOOKINGS.find(x=>x.id===modal.bid);var m=MACHINES.find(x=>x.id===b.machineId);
+    return`<div class="mbo" onclick="if(event.target===this)closeModal()"><div class="mod">
+    <div style="font-weight:700;font-size:16px;margin-bottom:3px">Modificar reserva</div>
+    <div style="color:#999;font-size:12px;margin-bottom:16px">${m.name}</div>
+    <label class="lbl">Nueva fecha</label><input class="inp" type="date" min="${T}" value="${modal.startDate}" onchange="modal.startDate=this.value" style="margin-bottom:11px">
+    <label class="lbl">Nueva hora</label><input class="inp" type="time" value="${modal.startTime}" onchange="modal.startTime=this.value" style="margin-bottom:11px">
+    <label class="lbl">Motivo *</label><textarea class="inp" rows="2" oninput="modal.reason=this.value" style="margin-bottom:11px;resize:none">${modal.reason||""}</textarea>
+    <div class="errbx" id="ee"></div>
+    <div style="display:flex;gap:8px;margin-top:9px"><button class="btn" onclick="closeModal()" style="flex:1">Cancelar</button><button class="btn btnp" onclick="saveEditB()" style="flex:1">Guardar</button></div>
+    </div></div>`;
+  }
+  if(modal.t==="cancB"){
+    var b=BOOKINGS.find(x=>x.id===modal.bid);var m=MACHINES.find(x=>x.id===b.machineId);var owner=USERS.find(x=>x.id===b.wid);var isOwn=b.wid===cu.id;
+    return`<div class="mbo" onclick="if(event.target===this)closeModal()"><div class="mod">
+    <div style="font-size:30px;margin-bottom:10px">⚠️</div>
+    <div style="font-weight:700;font-size:16px;margin-bottom:4px">Cancelar reserva</div>
+    ${!isOwn?`<div class="warnbx">Cancelando reserva de <strong>${owner?owner.name:""}</strong>. Quedara registrado.</div>`:""}
+    <div style="background:#f9f9f9;border-radius:10px;padding:11px;margin-bottom:14px;font-size:12px">
+    <div class="ir"><span class="il">Maquina</span><span>${m?m.name:""}</span></div>
+    <div class="ir"><span class="il">Inicio</span><span>${b.startDate} · ${b.startTime}</span></div>
+    ${owner&&!isOwn?`<div class="ir"><span class="il">Trabajador</span><span>${owner.name}</span></div>`:""}
+    </div>
+    <label class="lbl">Motivo *</label>
+    <textarea class="inp" rows="2" oninput="modal.reason=this.value" style="margin-bottom:11px;resize:none">${modal.reason||""}</textarea>
+    <div class="errbx" id="ce"></div>
+    <div style="display:flex;gap:8px;margin-top:9px"><button class="btn" onclick="closeModal()" style="flex:1">Volver</button><button class="btn btnd" onclick="confirmCancB()" style="flex:1">Confirmar</button></div>
+    </div></div>`;
+  }
+  if(modal.t==="addMachine"){
+    return`<div class="mbo" onclick="if(event.target===this)closeModal()"><div class="mod">
+    <div style="font-weight:700;font-size:16px;margin-bottom:16px">Añadir nueva maquina</div>
+    <label class="lbl">Nombre *</label><input class="inp" placeholder="Ej: Fregadora C1" value="${newMachine.name}" oninput="newMachine.name=this.value" style="margin-bottom:11px">
+    <label class="lbl">Tipo *</label><select class="inp" onchange="newMachine.type=this.value" style="margin-bottom:11px">${TYPES.map(t=>`<option ${newMachine.type===t?"selected":""}>${t}</option>`).join("")}</select>
+    <label class="lbl">Ubicacion *</label><select class="inp" onchange="newMachine.loc=this.value" style="margin-bottom:11px">${LOCS.map(l=>`<option ${newMachine.loc===l?"selected":""}>${l}</option>`).join("")}</select>
+    <label class="lbl">Notas</label><textarea class="inp" rows="2" oninput="newMachine.notes=this.value" style="margin-bottom:16px;resize:none">${newMachine.notes}</textarea>
+    <div style="display:flex;gap:8px"><button class="btn" onclick="closeModal()" style="flex:1">Cancelar</button><button class="btn btnp" onclick="addMachine()" style="flex:1">Añadir</button></div>
+    </div></div>`;
+  }
+  if(modal.t==="editMachineState"){
+    return`<div class="mbo" onclick="if(event.target===this)closeModal()"><div class="mod">
+    <div style="font-size:26px;margin-bottom:8px">⚙️</div>
+    <div style="font-weight:700;font-size:16px;margin-bottom:3px">Cambiar estado</div>
+    <div style="color:#999;font-size:12px;margin-bottom:16px">${modal.name}</div>
+    <label class="lbl">Estado de la maquina *</label>
+    <div style="margin-top:6px;margin-bottom:14px">
+    ${CONDS.map(c=>{
+      var cls=modal.cond===c?condOnClass(c):"";
+      return`<span class="cond-opt ${cls}" onclick="modal.cond='${c}';render()">${c}</span>`;
+    }).join("")}
+    </div>
+    <label class="lbl">Notas (opcional)</label>
+    <textarea class="inp" rows="2" placeholder="Ej: Fuga en deposito, motor no arranca..." oninput="modal.notes=this.value" style="margin-bottom:14px;resize:none">${modal.notes||""}</textarea>
+    <div class="errbx" id="ems"></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+    <button class="btn" onclick="closeModal()" style="flex:1">Cancelar</button>
+    <button class="btn btnp" onclick="saveEditMachineState()" style="flex:1">Guardar</button>
+    </div>
+    </div></div>`;
+  }
+  if(modal.t==="confirmBaja"){
+    return`<div class="mbo" onclick="if(event.target===this)closeModal()"><div class="mod">
+    <div style="font-size:30px;margin-bottom:10px">🗑️</div>
+    <div style="font-weight:700;font-size:16px;margin-bottom:4px">Dar de baja maquina</div>
+    <div style="background:#fff5f5;border:1px solid #fca5a5;border-radius:10px;padding:12px;margin-bottom:16px">
+    <div style="font-weight:600;font-size:13px;color:#dc2626;margin-bottom:4px">⚠️ Esta accion es permanente</div>
+    <div style="font-size:12px;color:#666">Se eliminara <strong>${modal.name}</strong> del sistema y no podra recuperarse.</div>
+    </div>
+    <div style="display:flex;gap:8px"><button class="btn" onclick="closeModal()" style="flex:1">Cancelar</button><button class="btn btnd" onclick="doDeleteMachine('${modal.mid}')" style="flex:1">Dar de baja</button></div>
+    </div></div>`;
+  }
+  if(modal.t==="addUser"){
+    return`<div class="mbo" onclick="if(event.target===this)closeModal()"><div class="mod">
+    <div style="font-weight:700;font-size:16px;margin-bottom:16px">Añadir trabajador</div>
+    <label class="lbl">Nombre completo *</label><input class="inp" placeholder="Ej: Maria Lopez" value="${newUser.name}" oninput="newUser.name=this.value" style="margin-bottom:11px">
+    <label class="lbl">PIN de acceso (4 digitos) *</label><input class="inp" type="password" maxlength="4" placeholder="Ej: 6789" value="${newUser.pin}" oninput="newUser.pin=this.value.replace(/\\D/g,'').slice(0,4)" style="margin-bottom:5px">
+    <div style="font-size:11px;color:#999;margin-bottom:16px">El PIN debe ser unico</div>
+    <div style="display:flex;gap:8px"><button class="btn" onclick="closeModal()" style="flex:1">Cancelar</button><button class="btn btnp" onclick="addUser()" style="flex:1">Añadir</button></div>
+    </div></div>`;
+  }
+  return "";
+}
+
+// -- RENDER PRINCIPAL --
+function render() {
+  refreshDate();
+  var root=document.getElementById("root");
+  // Si no esta configurado, mostrar pantalla de setup
+  if(!CONFIGURED){root.innerHTML=rSetup();return;}
+  // Si no hay usuario, mostrar login
+  if(!cu){root.innerHTML=rLogin();return;}
+  var views={dashboard:rDash,calendar:rCal,book:rBook,mybookings:rMine,allbookings:rAllBookings,machines:rMachines,returns:rReturns,admin:rAdmin};
+  root.innerHTML=rNav()+rUpdateBanner()+'<div class="main">'+((views[view]||rDash)())+'</div>';
+  var old=document.getElementById("mc");if(old)old.remove();
+  if(modal){var d=document.createElement("div");d.id="mc";d.innerHTML=rModal();document.body.appendChild(d);}
+}
+
+// -- DIAS EN USO --
+function diasEnUso(startDate) {
+  var inicio = new Date(startDate + "T12:00:00");
+  var hoy = new Date(T + "T12:00:00");
+  var diff = Math.floor((hoy - inicio) / (1000 * 60 * 60 * 24));
+  return diff;
+}
+
+function getOverdueBookings() {
+  if (!BOOKINGS || !BOOKINGS.length) return [];
+  return BOOKINGS.filter(function(b) {
+    return !b.returned && b.startDate && diasEnUso(b.startDate) >= 7;
+  });
+}
+
+function badgeDias(startDate) {
+  var dias = diasEnUso(startDate);
+  if (dias <= 1) return "";
+  if (dias <= 3) return `<span class="bdg" style="background:#fffbeb;color:#d97706;border:1px solid #fcd34d">🟠 ${dias} dias en uso</span>`;
+  return `<span class="bdg" style="background:#fff5f5;color:#dc2626;border:1px solid #fca5a5">🔴 ${dias} dias - revisar</span>`;
+}
+
+// -- REFRESCO AUTOMATICO --
+var refreshInterval = null;
+var lastRefreshData = null;
+var hasUpdates = false;
+
+function hashData() {
+  // Genera un string simple para comparar si los datos cambiaron
+  return BOOKINGS.length + "_" + MACHINES.map(function(m){return m.id+m.cond+m.loc;}).join("|") +
+         "_" + BOOKINGS.map(function(b){return b.id+b.returned;}).join("|");
+}
+
+async function silentRefresh() {
+  if (!CONFIGURED || !cu || appLoading) return;
+  if (!navigator.onLine) return;
+  // No refrescar si la sesion va a expirar pronto (menos de 30s)
+  try {
+    var sessionTime = parseInt(sessionStorage.getItem("cf_session_time") || "0");
+    var remaining = (INACTIVITY_MINUTES * 60 * 1000) - (Date.now() - sessionTime);
+    if (remaining < 30000) return;
+  } catch(e) {}
+  // No interrumpir si el usuario esta en medio de una reserva o devolucion
+  if (view === "book" && (fD.date || fD.mid)) return;
+  if (view === "returns" && retF.bid) return;
+
+  try {
+    var [uRecs, mRecs, bRecs] = await Promise.all([
+      atGetAll("Users"), atGetAll("Machines"), atGetAll("Bookings")
+    ]);
+    var prevHash = hashData();
+
+    USERS = uRecs.map(r => ({
+      id:r.id, name:r.fields.Name||"", pin:String(r.fields.Pin||""),
+      isAdmin:r.fields.IsAdmin===true, ini:r.fields.Initials||""
+    }));
+    MACHINES = mRecs.map(r => ({
+      id:r.id, name:r.fields.Name||"", type:r.fields.Type||"Otro",
+      loc:r.fields.Location||"", cond:r.fields.Condition||"Lista para usar",
+      notes:r.fields.Notes||"", active:r.fields.Active===true
+    }));
+    BOOKINGS = bRecs.map(r => ({
+      id:r.id, machineId:r.fields.MachineId||"", wid:r.fields.WorkerId||"",
+      machineName:r.fields.MachineName||"", workerName:r.fields.WorkerName||"",
+      startDate:r.fields.StartDate||"", startTime:r.fields.StartTime||"",
+      comment:r.fields.Comment||"", returned:r.fields.Returned===true,
+      retDate:r.fields.RetDate||"", retTime:r.fields.RetTime||"",
+      retCond:r.fields.RetCondition||"", retLoc:r.fields.RetLocation||"",
+      retNotes:r.fields.RetNotes||""
+    }));
+
+    var newHash = hashData();
+    if (prevHash !== newHash) {
+      // Hay cambios - mostrar banner y re-renderizar
+      hasUpdates = true;
+      render();
+    }
+  } catch(e) {
+    // Silencioso - no mostrar error en refresco automatico
+    console.log("Refresco silencioso fallido:", e.message);
+  }
+}
+
+function startAutoRefresh() {
+  if (refreshInterval) clearInterval(refreshInterval);
+  refreshInterval = setInterval(silentRefresh, 60000); // cada 60 segundos
+}
+
+function dismissUpdates() {
+  hasUpdates = false;
+  render();
+}
+
+function rUpdateBanner() {
+  if (!hasUpdates) return "";
+  return `<div style="background:#fffbeb;border-bottom:1px solid #fcd34d;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;font-size:12px">
+  <span style="color:#d97706;font-weight:600">🔄 Los datos se han actualizado automaticamente</span>
+  <button class="btn" style="padding:3px 10px;font-size:11px;border-color:#fcd34d;color:#d97706" onclick="dismissUpdates()">✓ Entendido</button>
+  </div>`;
+}
+
+// Arrancar
+setupActivityListeners();
+if(CONFIGURED) {
+  loadAll().then(function() {
+    // Intentar restaurar sesion al recargar
+    var savedUid = restoreSession();
+    if (savedUid && USERS.length > 0) {
+      var savedUser = USERS.find(function(u){ return u.id === savedUid; });
+      if (savedUser) {
+        cu = savedUser;
+        resetInactivityTimer();
+        render();
+      }
+    }
+    startAutoRefresh();
+  });
+} else render();
+</script>
+</body>
+</html>
